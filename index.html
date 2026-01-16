@@ -196,31 +196,13 @@
             <div class="bg-white rounded-lg shadow-sm p-8">
                 <h2 class="text-2xl font-serif text-gray-900 mb-6">Curriculum Vitae</h2>
                 
-                <div id="cv-upload" class="border-2 border-dashed border-gray-300 rounded-lg p-12 text-center">
-                    <svg class="mx-auto text-gray-400 mb-4" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                        <polyline points="14 2 14 8 20 8"></polyline>
-                        <line x1="16" y1="13" x2="8" y2="13"></line>
-                        <line x1="16" y1="17" x2="8" y2="17"></line>
-                        <polyline points="10 9 9 9 8 9"></polyline>
-                    </svg>
-                    <p class="text-gray-600 mb-4">Upload your CV (PDF format)</p>
-                    <label class="inline-block px-6 py-2 bg-blue-600 text-white rounded-lg cursor-pointer hover:bg-blue-700 transition-colors">
-                        Choose File
-                        <input type="file" accept="application/pdf" onchange="loadPDF(event)" class="hidden" id="cv-file-input">
-                    </label>
+                <div class="mb-4">
+                    <a href="cv.pdf" download class="inline-block px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm">
+                        Download CV (PDF)
+                    </a>
                 </div>
-
-                <div id="cv-viewer" class="hidden">
-                    <div class="mb-4 flex justify-between items-center">
-                        <p class="text-gray-600">CV Preview</p>
-                        <label class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg cursor-pointer hover:bg-gray-200 transition-colors text-sm">
-                            Change File
-                            <input type="file" accept="application/pdf" onchange="loadPDF(event)" class="hidden">
-                        </label>
-                    </div>
-                    <iframe id="cv-iframe" class="w-full h-[800px] border border-gray-300 rounded-lg" title="CV PDF"></iframe>
-                </div>
+                
+                <iframe src="cv.pdf" class="w-full h-[800px] border border-gray-300 rounded-lg" title="CV PDF"></iframe>
             </div>
         </div>
 
@@ -324,15 +306,7 @@
             }
         }
 
-        function loadPDF(event) {
-            const file = event.target.files[0];
-            if (file && file.type === 'application/pdf') {
-                const url = URL.createObjectURL(file);
-                document.getElementById('cv-iframe').src = url;
-                document.getElementById('cv-upload').classList.add('hidden');
-                document.getElementById('cv-viewer').classList.remove('hidden');
-            }
-        }
+
     </script>
 </body>
 </html>

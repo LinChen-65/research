@@ -551,31 +551,12 @@
             <!-- Traces on Earth -->
             <div class="card">
                 <h2>Traces on Earth</h2>
-                <svg id="world-map" viewBox="0 0 1000 500">
-                    <!-- World map will be rendered here -->
-                </svg>
-                <div class="location-grid">
-                    <div class="location-card">
-                        <div class="location-dot"></div>
-                        <p class="location-name">Boston, MA</p>
-                    </div>
-                    <div class="location-card">
-                        <div class="location-dot"></div>
-                        <p class="location-name">San Francisco, CA</p>
-                    </div>
-                    <div class="location-card">
-                        <div class="location-dot"></div>
-                        <p class="location-name">London, UK</p>
-                    </div>
-                    <div class="location-card">
-                        <div class="location-dot"></div>
-                        <p class="location-name">Tokyo, Japan</p>
-                    </div>
-                    <div class="location-card">
-                        <div class="location-dot"></div>
-                        <p class="location-name">Paris, France</p>
-                    </div>
-                </div>
+                <p style="margin-bottom: 16px;">
+                    Explore the places I've visited around the world.
+                </p>
+                <a href="https://beeneverywhere.net/user/2260" target="_blank" class="dance-button">
+                    View My Travel Map
+                </a>
             </div>
 
             <!-- Dance -->
@@ -605,105 +586,6 @@
     </footer>
 
     <script>
-        // Sample locations for the map
-        const locations = [
-            { name: 'Boston, MA', lat: 42.3601, lng: -71.0589 },
-            { name: 'San Francisco, CA', lat: 37.7749, lng: -122.4194 },
-            { name: 'London, UK', lat: 51.5074, lng: -0.1278 },
-            { name: 'Tokyo, Japan', lat: 35.6762, lng: 139.6503 },
-            { name: 'Paris, France', lat: 48.8566, lng: 2.3522 },
-        ];
-
-        function drawWorldMap() {
-            const svg = document.getElementById('world-map');
-            
-            // Convert lat/lng to SVG coordinates
-            function latLngToXY(lat, lng) {
-                const x = ((lng + 180) / 360) * 1000;
-                const y = ((90 - lat) / 180) * 500;
-                return { x, y };
-            }
-
-            // Simple world map outline (continents as basic shapes)
-            const continents = `
-                <path d="M 100 150 Q 150 120 200 150 Q 250 140 300 160 Q 320 180 300 200 Q 280 220 250 210 Q 200 220 150 200 Q 100 190 100 150 Z" 
-                      fill="#e0e7ff" stroke="#4f46e5" stroke-width="1" opacity="0.6"/>
-                <path d="M 350 180 Q 400 160 450 180 Q 480 200 470 240 Q 450 270 420 260 Q 380 250 350 230 Q 340 210 350 180 Z" 
-                      fill="#e0e7ff" stroke="#4f46e5" stroke-width="1" opacity="0.6"/>
-                <path d="M 500 200 Q 550 180 600 200 Q 650 220 640 260 Q 620 290 580 280 Q 540 270 520 250 Q 500 230 500 200 Z" 
-                      fill="#e0e7ff" stroke="#4f46e5" stroke-width="1" opacity="0.6"/>
-                <path d="M 700 150 Q 750 130 800 150 Q 850 170 840 210 Q 820 240 780 230 Q 740 220 710 200 Q 690 180 700 150 Z" 
-                      fill="#e0e7ff" stroke="#4f46e5" stroke-width="1" opacity="0.6"/>
-                <path d="M 150 300 Q 180 280 220 300 Q 250 320 240 350 Q 220 370 190 360 Q 160 350 150 330 Q 145 315 150 300 Z" 
-                      fill="#e0e7ff" stroke="#4f46e5" stroke-width="1" opacity="0.6"/>
-                <path d="M 300 280 Q 350 260 400 280 Q 430 300 420 330 Q 400 350 370 340 Q 330 330 310 310 Q 295 295 300 280 Z" 
-                      fill="#e0e7ff" stroke="#4f46e5" stroke-width="1" opacity="0.6"/>
-            `;
-            
-            svg.innerHTML = continents;
-
-            // Add location markers
-            locations.forEach(loc => {
-                const pos = latLngToXY(loc.lat, loc.lng);
-                
-                // Create marker group
-                const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-                g.setAttribute('class', 'location-marker');
-                
-                // Marker circle
-                const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-                circle.setAttribute('cx', pos.x);
-                circle.setAttribute('cy', pos.y);
-                circle.setAttribute('r', '6');
-                circle.setAttribute('fill', '#dc2626');
-                circle.setAttribute('stroke', '#fff');
-                circle.setAttribute('stroke-width', '2');
-                
-                // Label background
-                const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-                rect.setAttribute('x', pos.x + 10);
-                rect.setAttribute('y', pos.y - 10);
-                rect.setAttribute('width', loc.name.length * 7);
-                rect.setAttribute('height', '20');
-                rect.setAttribute('fill', 'white');
-                rect.setAttribute('stroke', '#dc2626');
-                rect.setAttribute('stroke-width', '1');
-                rect.setAttribute('rx', '3');
-                rect.setAttribute('opacity', '0');
-                rect.setAttribute('class', 'marker-label');
-                
-                // Label text
-                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-                text.setAttribute('x', pos.x + 15);
-                text.setAttribute('y', pos.y + 4);
-                text.setAttribute('fill', '#1f2937');
-                text.setAttribute('font-size', '12');
-                text.setAttribute('font-weight', 'bold');
-                text.setAttribute('opacity', '0');
-                text.setAttribute('class', 'marker-label');
-                text.textContent = loc.name;
-                
-                g.appendChild(circle);
-                g.appendChild(rect);
-                g.appendChild(text);
-                
-                // Hover effects
-                g.addEventListener('mouseenter', () => {
-                    circle.setAttribute('r', '8');
-                    rect.setAttribute('opacity', '0.95');
-                    text.setAttribute('opacity', '1');
-                });
-                
-                g.addEventListener('mouseleave', () => {
-                    circle.setAttribute('r', '6');
-                    rect.setAttribute('opacity', '0');
-                    text.setAttribute('opacity', '0');
-                });
-                
-                svg.appendChild(g);
-            });
-        }
-
         function showTab(tabName) {
             const contents = document.querySelectorAll('.tab-content');
             contents.forEach(content => content.classList.remove('active'));
@@ -713,10 +595,6 @@
             
             document.getElementById('content-' + tabName).classList.add('active');
             document.getElementById('tab-' + tabName).classList.add('active');
-
-            if (tabName === 'misc') {
-                setTimeout(drawWorldMap, 100);
-            }
         }
 
         function filterPublications() {
@@ -746,6 +624,7 @@
     </script>
 </body>
 </html>
+
 
 
 

@@ -5,8 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dr. Your Name - Academic Research Website</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
     <style>
         .prose p {
             margin-bottom: 1rem;
@@ -269,7 +267,31 @@
                 <!-- Traces on Earth -->
                 <div class="bg-white rounded-lg shadow-sm p-8">
                     <h2 class="text-2xl font-serif text-gray-900 mb-6">Traces on Earth</h2>
-                    <div id="map" style="height: 500px; width: 100%;"></div>
+                    <svg id="world-map" viewBox="0 0 1000 500" class="w-full border border-gray-300 rounded-lg bg-blue-50">
+                        <!-- World map will be rendered here -->
+                    </svg>
+                    <div class="mt-4 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+                        <div class="bg-gray-50 rounded p-3 text-center">
+                            <div class="w-3 h-3 bg-red-600 rounded-full mx-auto mb-2"></div>
+                            <p class="text-sm font-medium text-gray-900">Boston, MA</p>
+                        </div>
+                        <div class="bg-gray-50 rounded p-3 text-center">
+                            <div class="w-3 h-3 bg-red-600 rounded-full mx-auto mb-2"></div>
+                            <p class="text-sm font-medium text-gray-900">San Francisco, CA</p>
+                        </div>
+                        <div class="bg-gray-50 rounded p-3 text-center">
+                            <div class="w-3 h-3 bg-red-600 rounded-full mx-auto mb-2"></div>
+                            <p class="text-sm font-medium text-gray-900">London, UK</p>
+                        </div>
+                        <div class="bg-gray-50 rounded p-3 text-center">
+                            <div class="w-3 h-3 bg-red-600 rounded-full mx-auto mb-2"></div>
+                            <p class="text-sm font-medium text-gray-900">Tokyo, Japan</p>
+                        </div>
+                        <div class="bg-gray-50 rounded p-3 text-center">
+                            <div class="w-3 h-3 bg-red-600 rounded-full mx-auto mb-2"></div>
+                            <p class="text-sm font-medium text-gray-900">Paris, France</p>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Dance -->
@@ -353,4 +375,5 @@
     </script>
 </body>
 </html>
+
 

@@ -1,0 +1,276 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background-color: #f9fafb;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
+header {
+    background: white;
+    border-bottom: 1px solid #e5e7eb;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    padding: 24px 0;
+}
+
+h1 {
+    font-size: 30px;
+    font-family: Georgia, serif;
+    color: #111827;
+    margin-bottom: 4px;
+}
+
+.subtitle {
+    color: #6b7280;
+}
+
+nav {
+    background: white;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.nav-buttons {
+    display: flex;
+    gap: 32px;
+}
+
+.tab-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 16px 0;
+    border: none;
+    background: none;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    color: #6b7280;
+    font-size: 15px;
+    transition: all 0.2s;
+    text-decoration: none;
+}
+
+.tab-button:hover {
+    color: #111827;
+}
+
+.tab-button.active {
+    color: #2563eb;
+    border-bottom-color: #2563eb;
+}
+
+main {
+    padding: 32px 0;
+}
+
+.card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    padding: 32px;
+    margin-bottom: 32px;
+}
+
+h2 {
+    font-size: 24px;
+    font-family: Georgia, serif;
+    color: #111827;
+    margin-bottom: 16px;
+}
+
+h3 {
+    font-size: 20px;
+    font-family: Georgia, serif;
+    color: #111827;
+    margin-bottom: 16px;
+}
+
+.intro-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 32px;
+}
+
+.news-scroll {
+    max-height: 384px;
+    overflow-y: auto;
+    padding-right: 8px;
+}
+
+.news-scroll::-webkit-scrollbar {
+    width: 6px;
+}
+
+.news-scroll::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.news-scroll::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 3px;
+}
+
+.news-item {
+    border-left: 2px solid #2563eb;
+    padding-left: 16px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    margin-bottom: 16px;
+}
+
+.news-date {
+    font-size: 14px;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+.news-text {
+    color: #374151;
+    margin-top: 4px;
+}
+
+.search-box {
+    position: relative;
+    margin-bottom: 24px;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 10px 10px 10px 40px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 15px;
+}
+
+.search-box input:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+}
+
+.search-icon {
+    position: absolute;
+    left: 12px;
+    top: 12px;
+    color: #9ca3af;
+}
+
+.publication-item {
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 24px;
+    margin-bottom: 24px;
+}
+
+.publication-item:last-child {
+    border-bottom: none;
+}
+
+.pub-title {
+    font-size: 18px;
+    font-weight: 500;
+    color: #111827;
+    margin-bottom: 8px;
+}
+
+.pub-authors {
+    color: #6b7280;
+    margin-bottom: 8px;
+}
+
+.pub-venue {
+    color: #6b7280;
+    font-style: italic;
+    margin-bottom: 12px;
+}
+
+.keywords {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.keyword {
+    padding: 6px 12px;
+    background: #eff6ff;
+    color: #1d4ed8;
+    border-radius: 999px;
+    font-size: 14px;
+}
+
+.cv-frame {
+    width: 100%;
+    height: 800px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+}
+
+.award-item {
+    border-left: 2px solid #2563eb;
+    padding-left: 16px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    margin-bottom: 12px;
+}
+
+.award-title {
+    color: #111827;
+    font-weight: 500;
+}
+
+.award-org {
+    color: #6b7280;
+    font-size: 14px;
+}
+
+.dance-button {
+    display: inline-block;
+    padding: 12px 24px;
+    background: #2563eb;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: background 0.2s;
+}
+
+.dance-button:hover {
+    background: #1d4ed8;
+}
+
+footer {
+    background: white;
+    border-top: 1px solid #e5e7eb;
+    padding: 24px 0;
+    margin-top: 48px;
+    text-align: center;
+    color: #6b7280;
+}
+
+.no-results {
+    text-align: center;
+    padding: 32px;
+    color: #6b7280;
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .intro-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .nav-buttons {
+        gap: 16px;
+        overflow-x: auto;
+    }
+}

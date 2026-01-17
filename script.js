@@ -24,6 +24,7 @@ function filterPublications() {
 }
 
 function toggleAbstract(button) {
-    const abstract = button.nextElementSibling;
+    const buttonsDiv = button.parentElement;
+    const abstract = buttonsDiv.nextElementSibling;
     abstract.classList.toggle('expanded');
 }

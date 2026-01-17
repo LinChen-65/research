@@ -391,16 +391,17 @@ h3 {
 .dance-button {
     display: inline-block;
     padding: 12px 24px;
-    background: #2563eb;
-    color: white;
+    background: #f3f4f6;
+    color: #374151;
+    border: 1px solid #d1d5db;
     text-decoration: none;
     border-radius: 8px;
-    font-weight: 500;
+    font-weight: normal;
     transition: background 0.2s;
 }
 
 .dance-button:hover {
-    background: #1d4ed8;
+    background: #e5e7eb;
 }
 
 footer {

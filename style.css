@@ -318,9 +318,9 @@ h3 {
 
 .paper-button {
     padding: 6px 16px;
-    background: #2563eb;
-    color: white;
-    border: 1px solid #2563eb;
+    background: #f3f4f6;
+    color: #374151;
+    border: 1px solid #d1d5db;
     border-radius: 4px;
     font-size: 14px;
     cursor: pointer;
@@ -331,8 +331,7 @@ h3 {
 }
 
 .paper-button:hover {
-    background: #1d4ed8;
-    border-color: #1d4ed8;
+    background: #e5e7eb;
 }
 
 .pub-abstract {

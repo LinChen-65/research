@@ -294,13 +294,19 @@ h3 {
     margin-bottom: 12px;
 }
 
+.pub-buttons {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
 .abs-button {
-    padding: 4px 12px;
+    padding: 6px 16px;
     background: #f3f4f6;
     color: #374151;
     border: 1px solid #d1d5db;
     border-radius: 4px;
-    font-size: 13px;
+    font-size: 14px;
     cursor: pointer;
     transition: all 0.2s;
     font-weight: 500;
@@ -308,6 +314,25 @@ h3 {
 
 .abs-button:hover {
     background: #e5e7eb;
+}
+
+.paper-button {
+    padding: 6px 16px;
+    background: #2563eb;
+    color: white;
+    border: 1px solid #2563eb;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 500;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.paper-button:hover {
+    background: #1d4ed8;
+    border-color: #1d4ed8;
 }
 
 .pub-abstract {

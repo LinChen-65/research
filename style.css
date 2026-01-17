@@ -309,7 +309,7 @@ h3 {
     font-size: 14px;
     cursor: pointer;
     transition: all 0.2s;
-    font-weight: 500;
+    font-weight: normal;
 }
 
 .abs-button:hover {
@@ -325,7 +325,7 @@ h3 {
     font-size: 14px;
     cursor: pointer;
     transition: all 0.2s;
-    font-weight: 500;
+    font-weight: normal;
     text-decoration: none;
     display: inline-block;
 }

@@ -22,3 +22,8 @@ function filterPublications() {
         noResults.style.display = 'none';
     }
 }
+
+function toggleAbstract(button) {
+    const abstract = button.nextElementSibling;
+    abstract.classList.toggle('expanded');
+}

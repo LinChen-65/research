@@ -160,6 +160,29 @@ main {
     margin-bottom: 32px;
 }
 
+.misc-content {
+    background: white;
+    padding: 48px;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.misc-section {
+    padding: 32px 0;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.misc-section:first-child {
+    padding-top: 0;
+}
+
+.misc-section:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
 h2 {
     font-size: 24px;
     font-family: Georgia, serif;

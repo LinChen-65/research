@@ -64,7 +64,7 @@
             </div>
 
             <div id="publications-list">
-                <div class="publication-item" data-keywords="deep learning,complex systems,neural networks">
+                <div class="publication-item" data-keywords="">
                     <h3 class="pub-title">Using human mobility data to quantify experienced urban inequalities</h3>
                     <p class="pub-authors">Fengli Xu, Qi Wang, Esteban Moro, <b>Lin Chen</b>, Arianna Salazar Miranda, Marta C. Gonzalez, Michele Tizzoni, Chaoming Song, Carlo Ratti, Luis Bettencourt, Yong Li, and James Evans</p>
                     <p class="pub-venue">Nature Human Behaviour, 2025</p>
@@ -77,31 +77,123 @@
                     </div>
                 </div>
 
-                <div class="publication-item" data-keywords="machine learning,data analysis,optimization">
-                    <h3 class="pub-title">Novel Framework for Data Analysis</h3>
-                    <p class="pub-authors">Your Name, Collaborator C</p>
-                    <p class="pub-venue">ICML 2024</p>
+                <div class="publication-item" data-keywords="">
+                    <h3 class="pub-title">Large Language Model-driven Meta-structure Discovery in Heterogeneous Information Network</h3>
+                    <p class="pub-authors"><b>Lin Chen</b>, Fengli Xu, Nian Li, Zhenyu Han, Meng Wang, Yong Li, and Pan Hui</p>
+                    <p class="pub-venue">KDD, 2024</p>
                     <div class="pub-buttons">
                         <button class="abs-button" onclick="toggleAbstract(this)">Abstract</button>
-                        <a href="YOUR_PAPER_URL_2" target="_blank" class="paper-button">Paper</a>
+                        <a href="https://doi.org/10.1145/3637528.3671965" target="_blank" class="paper-button">Paper</a>
                     </div>
                     <div class="pub-abstract">
-                        We propose a novel framework for data analysis that leverages advanced machine learning techniques and optimization algorithms. The framework provides efficient methods for handling large-scale datasets while maintaining interpretability. Extensive experiments validate the effectiveness of our approach.
+                        Heterogeneous information networks (HIN) have gained increasing popularity in recent years for capturing complex relations between diverse types of nodes. Meta-structures are proposed as a useful tool to identify the important patterns in HINs, but hand-crafted meta-structures pose significant challenges for scaling up, drawing wide research attention towards developing automatic search algorithms. Previous efforts primarily focused on searching for meta-structures with good empirical performance, overlooking the importance of human comprehensibility and generalizability. To address this challenge, we draw inspiration from the emergent reasoning abilities of large language models (LLMs). We propose ReStruct, a meta-structure search framework that integrates LLM reasoning into the evolutionary procedure. ReStruct uses a grammar translator to encode the meta-structures into natural language sentences, and leverages the reasoning power of LLMs to evaluate their semantic feasibility. Besides, ReStruct also employs performance-oriented evolutionary operations. These two competing forces allow ReStruct to jointly optimize the semantic explainability and empirical performance of meta-structures. Furthermore, ReStruct contains a differential LLM explainer to generate and refine natural language explanations for the discovered meta-structures by reasoning through the search history. Experiments on eight representative HIN datasets demonstrate that ReStruct achieves state-of-the-art performance in both recommendation and node classification tasks. Moreover, a survey study involving 73 graduate students shows that the discovered meta-structures and generated explanations by ReStruct are substantially more comprehensible. Our code and questionnaire are available at https://github.com/LinChen-65/ReStruct.
                     </div>
                 </div>
 
-                <div class="publication-item" data-keywords="computational biology,genomics,algorithms">
-                    <h3 class="pub-title">Applications in Computational Biology</h3>
-                    <p class="pub-authors">Your Name, Collaborator D, Collaborator E</p>
-                    <p class="pub-venue">Bioinformatics, 2023</p>
+                <div class="publication-item" data-keywords="">
+                    <h3 class="pub-title">VulnerabilityMap: An Open Framework for Mapping Vulnerability among Urban Disadvantaged Populations in the United States</h3>
+                    <p class="pub-authors"><b>Lin Chen</b>, Yong Li, and Pan Hui</p>
+                    <p class="pub-venue">IJCAI, 2024</p>
                     <div class="pub-buttons">
                         <button class="abs-button" onclick="toggleAbstract(this)">Abstract</button>
-                        <a href="YOUR_PAPER_URL_3" target="_blank" class="paper-button">Paper</a>
+                        <a href="https://doi.org/10.24963/ijcai.2024/79" target="_blank" class="paper-button">Paper</a>
                     </div>
                     <div class="pub-abstract">
-                        This work explores applications of computational methods in biology, focusing on genomics and protein structure prediction. We develop efficient algorithms that scale to large biological datasets and demonstrate their utility in real-world genomics applications. Our methods achieve state-of-the-art performance on standard benchmarks.
+                        Cities are crucibles of numerous opportunities, but also hotbeds of inequality. The plight of disadvantaged populations who are "left behind" within urban environments has been an increasingly pressing concern, which poses substantial threats to the realization of the UN SDG agenda. However, a comprehensive framework for studying this urban dilemma is currently absent, preventing researchers from developing AI models for social good prediction and intervention. To fill this gap, we construct VulnerabilityMap, a framework to meticulously dissect the challenges faced by urban disadvantaged populations, unraveling their vulnerability to a spectrum of shocks and stresses that are categorized through the prism of Maslow's hierarchy of needs. Specifically, we systematically collect large-scale multi-sourced census and web-based data covering more than 328 million people in the United States regarding demographic features, neighborhood environments, offline mobility behaviors, and online social connections. These features are further related to vulnerability outcomes from short-term shocks such as COVID- 19 and long-term physiological, social, and self-actualization stresses. Leveraging our framework, we construct machine learning models that exhibit strong performance in predicting vulnerability outcomes from various disadvantage features, which shows the promising utility of our framework to support targeted AI models. Moreover, we provide model-based explainability analysis to interpret the reasons underlying model predictions, shedding light on intricate social factors that trap certain populations inside vulnerable situations. Our constructed dataset is publicly available at https://github.com/LinChen-65/VulnerabilityMap/.
                     </div>
                 </div>
+
+                <div class="publication-item" data-keywords="">
+                    <h3 class="pub-title">Counterfactual mobility network embedding reveals prevalent accessibility gaps in U.S. cities</h3>
+                    <p class="pub-authors">Yunke Zhang, Fengli Xu, <b>Lin Chen</b>, Yuan Yuan, James Evans, Luis Bettencourt, and Yong Li</p>
+                    <p class="pub-venue">Humanities and Social Sciences Communications, 2024</p>
+                    <div class="pub-buttons">
+                        <button class="abs-button" onclick="toggleAbstract(this)">Abstract</button>
+                        <a href="https://doi.org/10.1057/s41599-023-02570-5" target="_blank" class="paper-button">Paper</a>
+                    </div>
+                    <div class="pub-abstract">
+                        Living in cities affords expanded access to various resources, infrastructures, and services at reduced travel costs, which improves social life and promotes systemic gains. However, recent research shows that urban dwellers also experience inequality in accessing urban facilities, which manifests in distinct travel and visitation patterns for residents with different demographic backgrounds. Here, we go beyond simple flawed correlation analysis and reveal prevalent accessibility gaps by quantifying the causal effects of resident demographics on mobility patterns extracted from U.S. residents’ detailed interactions with millions of urban venues. Moreover, to efficiently reveal micro neighborhood-level accessibility gaps, we design a novel Counterfactual RANdom-walks-based Embedding (CRANE) method to learn continuous embedding vectors on urban mobility networks with confounding effects disentangled. Our analysis reveals significant income and racial gaps in mobility frequency and visitation rates to sports and education venues. Besides, bachelor’s degree holders experience greater mobility reduction during the COVID-19 crisis. With extensive experiments on neighborhood-level accessibility prediction and visualizing accessibility gaps with embeddings vectors, we demonstrate that the counterfactual mobility network embeddings can improve the explanatory capacity and robustness of revealed accessibility gaps by extending them from aggregate statistics to individual neighborhoods and allowing for cross-city knowledge transfer. As such, urban mobility networks can reveal consistent accessibility gaps in the U.S., calling for urgent urban design policies to fill in the gaps.
+                    </div>
+                </div>
+
+                <div class="publication-item" data-keywords="">
+                    <h3 class="pub-title">How enlightened self-interest guided global vaccine sharing benefits all: a modeling study</h3>
+                    <p class="pub-authors">Zhenyu Han, <b>Lin Chen</b>, Qianyue Hao, Qiwei He, Katherine Budeski, Depeng Jin, Fengli Xu, Kun Tang, and Yong Li</p>
+                    <p class="pub-venue">Journal of Global Health, 2023</p>
+                    <div class="pub-buttons">
+                        <button class="abs-button" onclick="toggleAbstract(this)">Abstract</button>
+                        <a href="https://jogh.org/2023/jogh-13-06038" target="_blank" class="paper-button">Paper</a>
+                    </div>
+                    <div class="pub-abstract">
+                        Despite consensus that vaccines play an important role in combatting the global spread of infectious diseases, vaccine inequity is still a prevalent issue due to a deep-seated mentality of self-priority. We aimed to evaluate the existence and possible outcomes of a more equitable global vaccine distribution and explore a concrete incentive mechanism that promotes vaccine equity.
+                    </div>
+                </div>
+
+                <div class="publication-item" data-keywords="">
+                    <h3 class="pub-title">Getting Back on Track: Understanding COVID-19 Impact on Urban Mobility and Segregation with Location Service Data</h3>
+                    <p class="pub-authors"><b>Lin Chen</b>, Qianyue Hao, Fengli Xu, Yong Li, and Pan Hui</p>
+                    <p class="pub-venue">ICWSM, 2023</p>
+                    <div class="pub-buttons">
+                        <button class="abs-button" onclick="toggleAbstract(this)">Abstract</button>
+                        <a href="https://doi.org/10.1609/icwsm.v17i1.22132" target="_blank" class="paper-button">Paper</a>
+                    </div>
+                    <div class="pub-abstract">
+                        Understanding the impact of COVID-19 on urban life rhythms is crucial for accelerating the return-to-normal progress and envisioning more resilient and inclusive cities. While previous studies either depended on small-scale surveys or focused on the response to initial lockdowns, this paper uses large-scale location service data to systematically analyze the urban mobility behavior changes across three distinct phases of the pandemic, ie, pre-pandemic, lockdown, and reopen. Our analyses reveal two typical patterns that govern the mobility behavior changes in most urban venues: daily life-centered urban venues go through smaller mobility drops during the lockdown and more rapid recovery after reopening, while work-centered urban venues suffer from more significant mobility drops that are likely to persist even after reopening. Such mobility behavior changes exert deeper impacts on the underlying social fabric, where the level of mobility reduction is positively correlated with the experienced segregation at that urban venue. Therefore, urban venues undergoing more mobility reduction are also more filled with people from homogeneous socio-demographic backgrounds. Moreover, mobility behavior changes display significant heterogeneity across geographical regions, which can be largely explained by the partisan inclination at the state level. Our study shows the vast potential of location service data in deriving a timely and comprehensive understanding of the social dynamic in urban space, which is valuable for informing the gradual transition back to the normal lifestyle in a “post-pandemic era”.
+                    </div>
+                </div>
+
+                <div class="publication-item" data-keywords="">
+                    <h3 class="pub-title">Strategic COVID-19 vaccine distribution can simultaneously elevate social utility and equity</h3>
+                    <p class="pub-authors"><b>Lin Chen*</b>, Fengli Xu*, Zhenyu Han, Kun Tang, Pan Hui, James Evans, Yong Li.</p>
+                    <p class="pub-venue">Nature Human Behaviour, 2022</p>
+                    <div class="pub-buttons">
+                        <button class="abs-button" onclick="toggleAbstract(this)">Abstract</button>
+                        <a href="https://doi.org/10.1038/s41562-022-01429-0" target="_blank" class="paper-button">Paper</a>
+                    </div>
+                    <div class="pub-abstract">
+                        Balancing social utility and equity in distributing limited vaccines is a critical policy concern for protecting against the prolonged COVID-19 pandemic and future health emergencies. What is the nature of the trade-off between maximizing collective welfare and minimizing disparities between more and less privileged communities? To evaluate vaccination strategies, we propose an epidemic model that explicitly accounts for both demographic and mobility differences among communities and their associations with heterogeneous COVID-19 risks, then calibrate it with large-scale data. Using this model, we find that social utility and equity can be simultaneously improved when vaccine access is prioritized for the most disadvantaged communities, which holds even when such communities manifest considerable vaccine reluctance. Nevertheless, equity among distinct demographic features may conflict; for example, low-income neighbourhoods might have fewer elder citizens. We design two behaviour-and-demography-aware indices, community risk and societal risk, which capture the risks communities face and those they impose on society from not being vaccinated, to inform the design of comprehensive vaccine distribution strategies. Our study provides a framework for uniting utility and equity-based considerations in vaccine distribution and sheds light on how to balance multiple ethical values in complex settings for epidemic control.
+                    </div>
+                </div>
+
+                <div class="publication-item" data-keywords="">
+                    <h3 class="pub-title">Hierarchical Multi-agent Model for Reinforced Medical Resource Allocation with Imperfect Information</h3>
+                    <p class="pub-authors">Qianyue Hao, Fengli Xu, <b>Lin Chen</b>, Pan Hui, and Yong Li</p>
+                    <p class="pub-venue">ACM Transactions on Intelligent Systems and Technology (TIST), 2022</p>
+                    <div class="pub-buttons">
+                        <button class="abs-button" onclick="toggleAbstract(this)">Abstract</button>
+                        <a href="https://doi.org/10.1145/3552436" target="_blank" class="paper-button">Paper</a>
+                    </div>
+                    <div class="pub-abstract">
+                        With the advent of the COVID-19 pandemic, the shortage in medical resources became increasingly more evident. Therefore, efficient strategies for medical resource allocation are urgently needed. However, conventional rule-based methods employed by public health experts have limited capability in dealing with the complex and dynamic pandemic-spreading situation. In addition, model-based optimization methods such as dynamic programming (DP) fail to work since we cannot obtain a precise model in real-world situations most of the time. Model-free reinforcement learning (RL) is a powerful tool for decision-making; however, three key challenges exist in solving this problem via RL: (1) complex situations and countless choices for decision-making in the real world; (2) imperfect information due to the latency of pandemic spreading; and (3) limitations on conducting experiments in the real world since we cannot set up pandemic outbreaks arbitrarily. In this article, we propose a hierarchical RL framework with several specially designed components. We design a decomposed action space with a corresponding training algorithm to deal with the countless choices, ensuring efficient and real-time strategies. We design a recurrent neural network–based framework to utilize the imperfect information obtained from the environment. We also design a multi-agent voting method, which modifies the decision-making process considering the randomness during model training and, thus, improves the performance. We build a pandemic-spreading simulator based on real-world data, serving as the experimental platform. We then conduct extensive experiments. The results show that our method outperforms all baselines, which reduces infections and deaths by 14.25% on average without the multi-agent voting method and up to 15.44% with it.
+                    </div>
+                </div>
+
+                <div class="publication-item" data-keywords="">
+                    <h3 class="pub-title">Hierarchical Reinforcement Learning for Scarce Medical Resource Allocation with Imperfect Information</h3>
+                    <p class="pub-authors">Qianyue Hao, Fengli Xu, <b>Lin Chen</b>, Pan Hui, and Yong Li</p>
+                    <p class="pub-venue">KDD, 2021</p>
+                    <div class="pub-buttons">
+                        <button class="abs-button" onclick="toggleAbstract(this)">Abstract</button>
+                        <a href="https://doi.org/10.1145/3447548.3467181" target="_blank" class="paper-button">Paper</a>
+                    </div>
+                    <div class="pub-abstract">
+                        Facing the outbreak of COVID-19, shortage in medical resources becomes increasingly outstanding. Therefore, efficient strategies for medical resource allocation are urgently called for. Reinforcement learning (RL) is powerful for decision making, but three key challenges exist in solving this problem via RL: (1) complex situation and countless choices for decision making in the real world; (2) only imperfect information are available due to the latency of pandemic spreading; (3) limitations on conducting experiments in real world since we cannot set pandemic outbreaks arbitrarily. In this paper, we propose a hierarchical reinforcement learning method with a corresponding training algorithm. We design a decomposed action space to deal with the countless choices to ensure efficient and real time strategies. We also design a recurrent neural network based framework to utilize the imperfect information obtained from the environment. We build a pandemic spreading simulator based on real world data, serving as the experimental platform. We conduct extensive experiments and the results show that our method outperforms all the baselines, which reduces infections and deaths by 14.25% on average.
+                    </div>
+                </div>
+
+                <div class="publication-item" data-keywords="">
+                    <h3 class="pub-title">Understanding the Urban Pandemic Spreading of COVID-19 with Real World Mobility Data</h3>
+                    <p class="pub-authors">Qianyue Hao*, <b>Lin Chen*</b>, Fengli Xu, Yong Li</p>
+                    <p class="pub-venue">KDD, 2020</p>
+                    <div class="pub-buttons">
+                        <button class="abs-button" onclick="toggleAbstract(this)">Abstract</button>
+                        <a href="https://doi.org/10.1145/3394486.3412860" target="_blank" class="paper-button">Paper</a>
+                    </div>
+                    <div class="pub-abstract">
+                        Facing the worldwide rapid spreading of COVID-19 pandemic, we need to understand its diffusion in the urban environments with heterogeneous population distribution and mobility. However, challenges exist in the choice of proper spatial resolution, integration of mobility data into epidemic modelling, as well as incorporation of unique characteristics of COVID-19. To address these challenges, we build a data-driven epidemic simulator with COVID-19 specific features, which incorporates real-world mobility data capturing the heterogeneity in urban environments. Based on the simulator, we conduct two series of experiments to: (1) estimate the efficacy of different mobility control policies on intervening the epidemic; and (2) study how the heterogeneity of urban mobility affect the spreading process. Extensive results not only highlight the effectiveness of fine-grained targeted mobility control policies, but also uncover different levels of impact of population density and mobility strength on the spreading process. With such capability and demonstrations, our open simulator contributes to a better understanding of the complex spreading process and smarter policies to prevent another pandemic.
+                    </div>
+                </div>
+                
             </div>
             <p id="no-results" class="no-results">No publications found matching your search.</p>
         </div>

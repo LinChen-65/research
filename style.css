@@ -73,6 +73,84 @@ main {
     padding: 32px 0;
 }
 
+.intro-content {
+    background: white;
+    padding: 48px;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.intro-section {
+    padding: 32px 0;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.intro-section:first-child {
+    padding-top: 0;
+}
+
+.intro-section:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.intro-sidebar {
+    position: sticky;
+    top: 32px;
+    height: fit-content;
+}
+
+.profile-card {
+    background: white;
+    padding: 32px;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    text-align: center;
+}
+
+.profile-photo {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 16px;
+    border: 3px solid #e5e7eb;
+}
+
+.profile-name {
+    margin-bottom: 8px;
+}
+
+.profile-title {
+    color: #6b7280;
+    margin-bottom: 24px;
+    font-size: 14px;
+}
+
+.profile-links {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.profile-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: #f9fafb;
+    border-radius: 6px;
+    text-decoration: none;
+    color: #374151;
+    font-size: 14px;
+    transition: background 0.2s;
+    border: 1px solid #f3f4f6;
+}
+
+.profile-link:hover {
+    background: #f3f4f6;
+}
+
 .card {
     background: white;
     border-radius: 8px;

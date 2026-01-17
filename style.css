@@ -224,9 +224,9 @@ h3 {
 .news-item {
     border-left: 2px solid #2563eb;
     padding-left: 16px;
-    padding-top: 4px;
-    padding-bottom: 4px;
-    margin-bottom: 8px;
+    padding-top: 3px;
+    padding-bottom: 3px;
+    margin-bottom: 6px;
 }
 
 .news-date {

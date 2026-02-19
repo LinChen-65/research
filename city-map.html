@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>City Footprint</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:linear-gradient(135deg,#E3F2FD,#F1F8E9);height:100vh;overflow:hidden;position:relative}
+svg{display:block;width:100%;height:100vh}
+@keyframes pulse{0%{opacity:.4}50%{opacity:.1}100%{opacity:.4}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Panel */
+.panel{position:absolute;top:16px;left:16px;background:rgba(255,255,255,.92);border-radius:20px;padding:16px 20px;box-shadow:0 4px 20px rgba(0,0,0,.08);backdrop-filter:blur(10px);width:420px;max-height:calc(100vh - 80px);overflow-y:auto;z-index:10}
+.panel h1{font-size:18px;font-weight:700;margin-bottom:8px}
+.name-row{display:flex;gap:6px;margin-bottom:10px}
+.name-row input{flex:1;padding:6px 10px;border:1.5px solid #ddd;border-radius:10px;font-size:13px;outline:none;font-family:inherit}
+.name-row button{padding:6px 12px;border-radius:10px;border:none;background:#4ECDC4;color:#fff;font-size:12px;font-weight:600;cursor:pointer}
+.stats-row{display:flex;gap:16px;font-size:13px;color:#666;margin-bottom:8px}
+.stats-row b{color:#333;font-size:18px}
+.legend{display:flex;gap:6px;font-size:12px;margin-bottom:12px;flex-wrap:nowrap}
+.legend-item{display:flex;align-items:center;gap:4px;white-space:nowrap;padding:2px 8px;border-radius:8px}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0}
+.divider{border-top:1px solid #eee;padding-top:10px;margin-top:8px}
+.toggle-row{display:flex;gap:6px;margin-bottom:8px}
+.tb{padding:4px 12px;border-radius:8px;border:1.5px solid #ddd;background:#fff;font-size:12px;cursor:pointer;font-family:inherit;transition:all .2s}
+.tb.act{background:#4ECDC4;color:#fff;border-color:#4ECDC4}
+.tags{display:flex;flex-wrap:wrap;gap:2px}
+.tag{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:8px;font-size:12px;background:#f5f5f5;color:#555;margin:2px}
+.extremes{display:flex;gap:12px;font-size:12px;color:#666;flex-wrap:nowrap;margin-top:6px}
+.extremes b{color:#333}
+.extremes .coord{color:#999}
+
+/* Search */
+.search-box{position:absolute;top:16px;right:16px;width:320px;z-index:10;display:none}
+.search-inner{background:rgba(255,255,255,.92);border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,.08);backdrop-filter:blur(10px);overflow:hidden}
+.search-row{display:flex;align-items:center;padding:12px 16px;gap:8px}
+.search-row input{border:none;padding:4px 0;font-size:15px;outline:none;background:transparent;width:100%;font-family:inherit}
+.search-row .clear{cursor:pointer;color:#999;font-size:18px;display:none}
+.sr-list{border-top:1px solid #f0f0f0;max-height:300px;overflow-y:auto;display:none}
+.sr-item{padding:10px 16px;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+.sr-item:hover{background:#F5F5F5}
+.sr-item .name{font-size:14px;font-weight:500}
+.sr-item .country{font-size:12px;color:#999;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sr-item .added{font-size:11px;color:#aaa;margin-left:8px}
+.sr-item .plus{color:#4ECDC4;margin-left:8px;font-size:18px}
+.sr-empty{border-top:1px solid #f0f0f0;padding:12px 16px;color:#999;font-size:13px;display:none}
+
+/* Edit button */
+.edit-btn{position:absolute;bottom:20px;left:20px;display:flex;align-items:center;gap:8px;border:none;border-radius:14px;padding:10px 18px;font-size:14px;cursor:pointer;z-index:10;backdrop-filter:blur(10px)}
+.edit-btn.locked{background:rgba(255,255,255,.9);color:#888;box-shadow:0 4px 15px rgba(0,0,0,.08)}
+.edit-btn.unlocked{background:rgba(78,205,196,.9);color:#fff;font-weight:600;box-shadow:0 4px 15px rgba(78,205,196,.3)}
+
+/* Tooltip */
+.tooltip{position:fixed;background:#fff;border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,.15);z-index:50;max-width:280px;overflow:hidden;animation:fadeIn .15s;pointer-events:none;display:none}
+.tooltip img{width:100%;height:140px;object-fit:cover}
+.tooltip .tt-body{padding:12px 16px}
+.tooltip .tt-name{display:flex;align-items:center;gap:6px;margin-bottom:4px}
+.tooltip .tt-name span.d{width:10px;height:10px;border-radius:50%}
+.tooltip .tt-name span.n{font-weight:600;font-size:15px}
+.tooltip .tt-meta{font-size:12px;color:#999}
+.tooltip .tt-desc{font-size:13px;color:#555;line-height:1.5;margin-top:6px}
+
+/* Overlays */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.3);display:none;align-items:center;justify-content:center;z-index:100;animation:fadeIn .2s}
+.overlay.show{display:flex}
+.modal{background:#fff;border-radius:20px;padding:28px;max-width:90vw;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.15)}
+.modal h3{font-size:20px;margin:0}
+.modal label{font-size:13px;font-weight:600;color:#555;display:block;margin-bottom:6px}
+.inp{width:100%;padding:10px 14px;border:2px solid #E0E0E0;border-radius:12px;font-size:14px;outline:none;transition:border .2s;box-sizing:border-box;font-family:inherit;margin-bottom:14px}
+.inp:focus{border-color:#4ECDC4}
+textarea.inp{resize:vertical}
+.cat-row{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.cat-btn{transition:all .2s;cursor:pointer;border:2px solid #eee;border-radius:12px;padding:8px 14px;background:#fff;font-size:13px;font-family:inherit}
+.cat-btn.act{transform:scale(1.05)}
+.modal-img{width:100%;height:120px;object-fit:cover;border-radius:12px;margin-bottom:14px}
+.btn-row{display:flex;gap:10px}
+.sbtn{background:linear-gradient(135deg,#4ECDC4,#44B09E);color:#fff;border:none;padding:12px 32px;border-radius:14px;font-size:16px;font-weight:600;cursor:pointer;transition:transform .2s,box-shadow .2s}
+.sbtn:hover{transform:translateY(-1px);box-shadow:0 4px 15px rgba(78,205,196,.4)}
+.dbtn{background:none;border:2px solid #FF6B6B;color:#FF6B6B;padding:10px 20px;border-radius:14px;font-size:14px;cursor:pointer;transition:all .2s}
+.dbtn:hover{background:#FF6B6B;color:#fff}
+.loader{display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:16px}
+.loader .icon{font-size:48px}
+.loader .text{color:#666;font-size:18px}
+.err-text{color:#FF6B6B;font-size:13px;margin-bottom:12px;display:none}
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+  CONFIGURATION: Fill in your jsonbin.io credentials below.
+  1. Sign up at https://jsonbin.io (free)
+  2. Create a bin with content: {"cities":[],"name":""}
+  3. Copy your Bin ID and Master Key below
+  4. Set your edit password
+============================================================ -->
+<script>
+const CONFIG = {
+  JSONBIN_BIN_ID: "6996570843b1c97be989e1a4",
+  JSONBIN_MASTER_KEY: "$2a$10$4WXx0diZYEyI.geFXNzne..sBZZ4yXY6Y7a8DNTWvj3R3dL5m.NFq",
+  EDIT_PASSWORD: "testcode"
+};
+</script>
+
+<!-- Loading -->
+<div id="loader" class="loader"><span class="icon">🌍</span><span class="text">Loading map & city database...</span></div>
+
+<!-- Map -->
+<svg id="map" style="display:none"><g id="mapG"></g></svg>
+
+<!-- Stats Panel -->
+<div class="panel" id="panel" style="display:none">
+  <h1 id="title">🌍 My City Footprint</h1>
+  <div class="name-row" id="nameRow" style="display:none">
+    <input id="nameInput" placeholder="Enter your name...">
+    <button id="nameBtn">Save</button>
+  </div>
+  <div class="stats-row">
+    <span><b id="stTotal">0</b> cities</span>
+    <span><b id="stCountries">0</b> countries</span>
+  </div>
+  <div class="legend">
+    <span class="legend-item" style="background:#FFF0F0"><span class="dot" style="background:#FF6B6B"></span>Lived <b id="stLived">0</b></span>
+    <span class="legend-item" style="background:#F0FFFD"><span class="dot" style="background:#4ECDC4"></span>Traveled <b id="stTraveled">0</b></span>
+    <span class="legend-item" style="background:#FFFBF0"><span class="dot" style="background:#FFD166"></span>Passed Through <b id="stTransit">0</b></span>
+  </div>
+  <div id="extraStats" style="display:none">
+    <div class="divider">
+      <div class="toggle-row">
+        <button class="tb act" id="btnContinent" onclick="setGroupBy('continent')">By Continent</button>
+        <button class="tb" id="btnCountry" onclick="setGroupBy('country')">By Country</button>
+      </div>
+      <div class="tags" id="groupTags"></div>
+    </div>
+    <div class="divider">
+      <div style="font-size:13px;font-weight:600;color:#555;margin-bottom:6px">🧭 Extremes</div>
+      <div class="extremes" id="extremes"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Search -->
+<div class="search-box" id="searchBox">
+  <div class="search-inner">
+    <div class="search-row">
+      <span style="color:#999">🔍</span>
+      <input id="searchInput" placeholder="Search any city worldwide...">
+      <span class="clear" id="searchClear" onclick="clearSearch()">✕</span>
+    </div>
+    <div class="sr-list" id="srList"></div>
+    <div class="sr-empty" id="srEmpty">No results found.</div>
+  </div>
+</div>
+
+<!-- Edit button -->
+<button class="edit-btn locked" id="editBtn" onclick="toggleEdit()">🔒 Unlock to Edit</button>
+
+<!-- Tooltip -->
+<div class="tooltip" id="tooltip">
+  <img id="ttImg" src="" onerror="this.style.display='none'">
+  <div class="tt-body">
+    <div class="tt-name"><span class="d" id="ttDot"></span><span class="n" id="ttName"></span></div>
+    <div class="tt-meta" id="ttMeta"></div>
+    <div class="tt-desc" id="ttDesc"></div>
+  </div>
+</div>
+
+<!-- City Modal -->
+<div class="overlay" id="cityOverlay" onclick="closeCityModal()">
+  <div class="modal" style="width:420px" onclick="event.stopPropagation()">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <h3 id="cityModalTitle">✨ Add City</h3>
+      <span style="cursor:pointer;color:#999;font-size:20px" onclick="closeCityModal()">✕</span>
+    </div>
+    <label>City Name</label>
+    <input class="inp" id="mName" placeholder="e.g. Paris">
+    <label>Country / Region</label>
+    <input class="inp" id="mCountry" placeholder="e.g. France">
+    <div id="mCoordRow" style="display:none">
+      <div style="display:flex;gap:10px;margin-bottom:14px">
+        <div style="flex:1"><label>Latitude</label><input class="inp" id="mLat"></div>
+        <div style="flex:1"><label>Longitude</label><input class="inp" id="mLng"></div>
+      </div>
+    </div>
+    <label>Category</label>
+    <div class="cat-row" id="catRow"></div>
+    <label>Photo URL (optional)</label>
+    <input class="inp" id="mPhoto" placeholder="https://example.com/photo.jpg">
+    <img class="modal-img" id="mPhotoPreview" style="display:none" onerror="this.style.display='none'">
+    <label>Description (optional)</label>
+    <textarea class="inp" id="mDesc" rows="3" placeholder="Share your memories..."></textarea>
+    <div class="btn-row" id="btnRow">
+      <button class="dbtn" id="mDelBtn" onclick="deleteCity()" style="display:none">🗑 Delete</button>
+      <div style="flex:1"></div>
+      <button class="sbtn" onclick="saveCity()">💾 Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Password Modal -->
+<div class="overlay" id="passOverlay" onclick="closePassModal()">
+  <div class="modal" style="width:360px" onclick="event.stopPropagation()">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <h3>🔑 Enter Password</h3>
+      <span style="cursor:pointer;color:#999;font-size:20px" onclick="closePassModal()">✕</span>
+    </div>
+    <p style="color:#777;font-size:14px;margin-bottom:16px;line-height:1.5">Enter your password to unlock edit mode.</p>
+    <input class="inp" type="password" id="passInput" placeholder="Enter password..." onkeydown="if(event.key==='Enter')checkPass()">
+    <div class="err-text" id="passErr">Incorrect password.</div>
+    <button class="sbtn" style="width:100%" onclick="checkPass()">Unlock</button>
+  </div>
+</div>
+
+<script>
+// === Country/Continent Data ===
+const CC_RAW="AF,Afghanistan,AS|AL,Albania,EU|DZ,Algeria,AF|AD,Andorra,EU|AO,Angola,AF|AG,Antigua and Barbuda,NA|AR,Argentina,SA|AM,Armenia,AS|AU,Australia,OC|AT,Austria,EU|AZ,Azerbaijan,AS|BS,Bahamas,NA|BH,Bahrain,AS|BD,Bangladesh,AS|BB,Barbados,NA|BY,Belarus,EU|BE,Belgium,EU|BZ,Belize,NA|BJ,Benin,AF|BT,Bhutan,AS|BO,Bolivia,SA|BA,Bosnia and Herzegovina,EU|BW,Botswana,AF|BR,Brazil,SA|BN,Brunei,AS|BG,Bulgaria,EU|BF,Burkina Faso,AF|BI,Burundi,AF|KH,Cambodia,AS|CM,Cameroon,AF|CA,Canada,NA|CV,Cape Verde,AF|CF,Central African Republic,AF|TD,Chad,AF|CL,Chile,SA|CN,China,AS|CO,Colombia,SA|KM,Comoros,AF|CD,DR Congo,AF|CG,Congo,AF|CR,Costa Rica,NA|CI,Ivory Coast,AF|HR,Croatia,EU|CU,Cuba,NA|CY,Cyprus,EU|CZ,Czech Republic,EU|DK,Denmark,EU|DJ,Djibouti,AF|DM,Dominica,NA|DO,Dominican Republic,NA|EC,Ecuador,SA|EG,Egypt,AF|SV,El Salvador,NA|GQ,Equatorial Guinea,AF|ER,Eritrea,AF|EE,Estonia,EU|SZ,Eswatini,AF|ET,Ethiopia,AF|FJ,Fiji,OC|FI,Finland,EU|FR,France,EU|GA,Gabon,AF|GM,Gambia,AF|GE,Georgia,AS|DE,Germany,EU|GH,Ghana,AF|GR,Greece,EU|GD,Grenada,NA|GT,Guatemala,NA|GN,Guinea,AF|GW,Guinea-Bissau,AF|GY,Guyana,SA|HT,Haiti,NA|HN,Honduras,NA|HU,Hungary,EU|IS,Iceland,EU|IN,India,AS|ID,Indonesia,AS|IR,Iran,AS|IQ,Iraq,AS|IE,Ireland,EU|IL,Israel,AS|IT,Italy,EU|JM,Jamaica,NA|JP,Japan,AS|JO,Jordan,AS|KZ,Kazakhstan,AS|KE,Kenya,AF|KI,Kiribati,OC|KP,North Korea,AS|KR,South Korea,AS|KW,Kuwait,AS|KG,Kyrgyzstan,AS|LA,Laos,AS|LV,Latvia,EU|LB,Lebanon,AS|LS,Lesotho,AF|LR,Liberia,AF|LY,Libya,AF|LI,Liechtenstein,EU|LT,Lithuania,EU|LU,Luxembourg,EU|MG,Madagascar,AF|MW,Malawi,AF|MY,Malaysia,AS|MV,Maldives,AS|ML,Mali,AF|MT,Malta,EU|MH,Marshall Islands,OC|MR,Mauritania,AF|MU,Mauritius,AF|MX,Mexico,NA|FM,Micronesia,OC|MD,Moldova,EU|MC,Monaco,EU|MN,Mongolia,AS|ME,Montenegro,EU|MA,Morocco,AF|MZ,Mozambique,AF|MM,Myanmar,AS|NA,Namibia,AF|NR,Nauru,OC|NP,Nepal,AS|NL,Netherlands,EU|NZ,New Zealand,OC|NI,Nicaragua,NA|NE,Niger,AF|NG,Nigeria,AF|MK,North Macedonia,EU|NO,Norway,EU|OM,Oman,AS|PK,Pakistan,AS|PW,Palau,OC|PA,Panama,NA|PG,Papua New Guinea,OC|PY,Paraguay,SA|PE,Peru,SA|PH,Philippines,AS|PL,Poland,EU|PT,Portugal,EU|QA,Qatar,AS|RO,Romania,EU|RU,Russia,EU|RW,Rwanda,AF|KN,Saint Kitts and Nevis,NA|LC,Saint Lucia,NA|VC,Saint Vincent,NA|WS,Samoa,OC|SM,San Marino,EU|ST,Sao Tome and Principe,AF|SA,Saudi Arabia,AS|SN,Senegal,AF|RS,Serbia,EU|SC,Seychelles,AF|SL,Sierra Leone,AF|SG,Singapore,AS|SK,Slovakia,EU|SI,Slovenia,EU|SB,Solomon Islands,OC|SO,Somalia,AF|ZA,South Africa,AF|SS,South Sudan,AF|ES,Spain,EU|LK,Sri Lanka,AS|SD,Sudan,AF|SR,Suriname,SA|SE,Sweden,EU|CH,Switzerland,EU|SY,Syria,AS|TW,Taiwan,AS|TJ,Tajikistan,AS|TZ,Tanzania,AF|TH,Thailand,AS|TL,Timor-Leste,AS|TG,Togo,AF|TO,Tonga,OC|TT,Trinidad and Tobago,NA|TN,Tunisia,AF|TR,Turkey,EU|TM,Turkmenistan,AS|TV,Tuvalu,OC|UG,Uganda,AF|UA,Ukraine,EU|AE,UAE,AS|GB,United Kingdom,EU|US,United States,NA|UY,Uruguay,SA|UZ,Uzbekistan,AS|VU,Vanuatu,OC|VA,Vatican,EU|VE,Venezuela,SA|VN,Vietnam,AS|YE,Yemen,AS|ZM,Zambia,AF|ZW,Zimbabwe,AF|HK,Hong Kong,AS|MO,Macau,AS|PS,Palestine,AS|XK,Kosovo,EU|PR,Puerto Rico,NA";
+const CONT_NAMES={AS:"Asia",EU:"Europe",NA:"N. America",SA:"S. America",AF:"Africa",OC:"Oceania"};
+const CDATA={};
+CC_RAW.split("|").forEach(e=>{const[c,n,co]=e.split(",");CDATA[c]={name:n,cont:co}});
+
+const CATS={lived:{label:"🏠 Lived",color:"#FF6B6B",bg:"#FFF0F0"},traveled:{label:"✈️ Traveled",color:"#4ECDC4",bg:"#F0FFFD"},transit:{label:"🔄 Passed Through",color:"#FFD166",bg:"#FFFBF0"}};
+
+// === State ===
+let cities=[], ownerName="", allCitiesDB=[], geoData=null;
+let editMode=false, groupBy="continent";
+let modalIdx=-1, modalIsNew=true, modalCustom=false;
+let proj, path, zoomTf=d3.zoomIdentity;
+
+// === jsonbin.io API ===
+const API_URL=()=>`https://api.jsonbin.io/v3/b/${CONFIG.JSONBIN_BIN_ID}`;
+const API_HEADERS=()=>({"Content-Type":"application/json","X-Master-Key":CONFIG.JSONBIN_MASTER_KEY});
+
+async function loadData(){
+  try{
+    const r=await fetch(API_URL()+"/latest",{headers:API_HEADERS()});
+    const d=await r.json();
+    if(d.record){
+      cities=d.record.cities||[];
+      ownerName=d.record.name||"";
+    }
+  }catch(e){console.error("Load error:",e)}
+}
+
+async function saveData(){
+  try{
+    await fetch(API_URL(),{method:"PUT",headers:API_HEADERS(),body:JSON.stringify({cities,name:ownerName})});
+  }catch(e){console.error("Save error:",e)}
+}
+
+// === Init ===
+async function init(){
+  const[topoRaw,cityDB]=await Promise.all([
+    fetch("https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json").then(r=>r.json()),
+    fetch("https://cdn.jsdelivr.net/npm/cities.json@1.1.2/cities.json").then(r=>r.json()).catch(()=>[])
+  ]);
+  geoData=topoFeature(topoRaw,"countries");
+  allCitiesDB=cityDB;
+  await loadData();
+
+  document.getElementById("loader").style.display="none";
+  document.getElementById("map").style.display="block";
+  document.getElementById("panel").style.display="block";
+
+  renderMap();
+  updateStats();
+  updateTitle();
+
+  // Search
+  let timer;
+  const si=document.getElementById("searchInput");
+  si.addEventListener("input",()=>{
+    clearTimeout(timer);
+    document.getElementById("searchClear").style.display=si.value?"block":"none";
+    timer=setTimeout(()=>doSearch(si.value),250);
+  });
+
+  // Photo preview
+  document.getElementById("mPhoto").addEventListener("input",e=>{
+    const img=document.getElementById("mPhotoPreview");
+    if(e.target.value){img.src=e.target.value;img.style.display="block"}else img.style.display="none";
+  });
+}
+
+// === TopoJSON ===
+function topoFeature(t,name){
+  const obj=t.objects[name],tf=t.transform,arcs=t.arcs;
+  function dArc(i){const r=i<0,a=arcs[r?~i:i];let x=0,y=0;const p=a.map(([dx,dy])=>{x+=dx;y+=dy;return tf?[x*tf.scale[0]+tf.translate[0],y*tf.scale[1]+tf.translate[1]]:[x,y]});return r?p.reverse():p}
+  const ring=idxs=>{let c=[];idxs.forEach(i=>{c=c.concat(dArc(i))});return c};
+  const geom=g=>{if(g.type==="Polygon")return{type:"Polygon",coordinates:g.arcs.map(ring)};if(g.type==="MultiPolygon")return{type:"MultiPolygon",coordinates:g.arcs.map(p=>p.map(ring))};return null};
+  return{type:"FeatureCollection",features:(obj.geometries||[]).map(g=>({type:"Feature",id:g.id,properties:g.properties||{},geometry:geom(g)})).filter(f=>f.geometry)};
+}
+
+// === Map ===
+function renderMap(){
+  const svg=d3.select("#map"),g=d3.select("#mapG");
+  const w=svg.node().clientWidth,h=svg.node().clientHeight;
+  proj=d3.geoNaturalEarth1().fitSize([w-20,h-20],{type:"Sphere"}).translate([w/2,h/2]);
+  path=d3.geoPath(proj);
+
+  g.selectAll("path.water").data([{type:"Sphere"}]).join("path").attr("class","water").attr("d",path).attr("fill","#E3F2FD");
+  g.selectAll("path.graticule").data([d3.geoGraticule10()]).join("path").attr("class","graticule").attr("d",path).attr("fill","none").attr("stroke","#E0E0E0").attr("stroke-width",.3);
+  g.selectAll("path.country").data(geoData.features).join("path").attr("class","country").attr("d",path).attr("fill","#C8E6C9").attr("stroke","#fff").attr("stroke-width",.5);
+
+  const zoom=d3.zoom().scaleExtent([1,12]).on("zoom",e=>{
+    g.attr("transform",e.transform);zoomTf=e.transform;
+    g.selectAll("circle.cm").attr("r",6/e.transform.k).attr("stroke-width",2/e.transform.k);
+    g.selectAll("circle.cp").attr("r",10/e.transform.k).attr("stroke-width",1.5/e.transform.k);
+  });
+  svg.call(zoom);
+
+  svg.on("dblclick.custom",e=>{
+    if(!editMode)return;
+    e.preventDefault();
+    const[mx,my]=d3.pointer(e);
+    const coords=proj.invert([(mx-zoomTf.x)/zoomTf.k,(my-zoomTf.y)/zoomTf.k]);
+    if(coords)openCityModal(-1,true,{lat:coords[1].toFixed(2),lng:coords[0].toFixed(2),custom:true});
+  });
+
+  colorCountries();
+  renderMarkers();
+}
+
+function colorCountries(){
+  if(!geoData)return;
+  d3.select("#mapG").selectAll("path.country").attr("fill",d=>{
+    for(const c of cities){try{if(d3.geoContains(d.geometry,[c.lng,c.lat]))return"#A5D6A7"}catch{}}
+    return"#C8E6C9";
+  });
+}
+
+function renderMarkers(){
+  if(!proj)return;
+  const g=d3.select("#mapG"),k=zoomTf.k;
+  g.selectAll("circle.cp").remove();
+  g.selectAll("circle.cm").remove();
+
+  cities.forEach((c,i)=>{
+    const[x,y]=proj([c.lng,c.lat]);
+    g.append("circle").attr("class","cp").attr("cx",x).attr("cy",y).attr("r",10/k)
+      .attr("fill","none").attr("stroke",CATS[c.cat].color).attr("stroke-width",1.5/k).attr("opacity",.4).style("animation","pulse 2s infinite");
+    const m=g.append("circle").attr("class","cm").attr("cx",x).attr("cy",y).attr("r",6/k)
+      .attr("fill",CATS[c.cat].color).attr("stroke","#fff").attr("stroke-width",2/k)
+      .style("cursor","pointer").style("filter","drop-shadow(0 1px 2px rgba(0,0,0,0.3))")
+      .on("mouseenter",ev=>{showTooltip(c,x,y)}).on("mouseleave",()=>hideTooltip());
+    if(editMode)m.on("click",()=>openCityModal(i,false));
+    else m.on("click",null);
+  });
+}
+
+// === Tooltip ===
+function showTooltip(c,mx,my){
+  const tt=document.getElementById("tooltip");
+  const rect=document.getElementById("map").getBoundingClientRect();
+  const px=zoomTf.applyX(mx)+rect.left, py=zoomTf.applyY(my)+rect.top;
+
+  const img=document.getElementById("ttImg");
+  if(c.photo){img.src=c.photo;img.style.display="block"}else img.style.display="none";
+  document.getElementById("ttDot").style.background=CATS[c.cat]?.color;
+  document.getElementById("ttName").textContent=c.name;
+  document.getElementById("ttMeta").textContent=c.country+" · "+(CATS[c.cat]?.label||"");
+  const desc=document.getElementById("ttDesc");
+  if(c.desc){desc.textContent=c.desc;desc.style.display="block"}else desc.style.display="none";
+
+  tt.style.left=(px+12)+"px";tt.style.top=(py-10)+"px";tt.style.display="block";
+}
+function hideTooltip(){document.getElementById("tooltip").style.display="none"}
+
+// === Stats ===
+function updateStats(){
+  const cn=new Set(cities.map(c=>c.country||c.cc).filter(Boolean));
+  document.getElementById("stTotal").textContent=cities.length;
+  document.getElementById("stCountries").textContent=cn.size;
+  document.getElementById("stLived").textContent=cities.filter(c=>c.cat==="lived").length;
+  document.getElementById("stTraveled").textContent=cities.filter(c=>c.cat==="traveled").length;
+  document.getElementById("stTransit").textContent=cities.filter(c=>c.cat==="transit").length;
+
+  const extra=document.getElementById("extraStats");
+  if(cities.length===0){extra.style.display="none";return}
+  extra.style.display="block";
+  updateGroupTags();
+  updateExtremes();
+}
+
+function updateGroupTags(){
+  const map={};
+  cities.forEach(c=>{
+    const cc=c.cc||"";const cd=CDATA[cc];
+    if(groupBy==="continent"){const cont=cd?(CONT_NAMES[cd.cont]||cd.cont):"Other";map[cont]=(map[cont]||0)+1}
+    else{const cn=c.country||cd?.name||cc||"Unknown";map[cn]=(map[cn]||0)+1}
+  });
+  const sorted=Object.entries(map).sort((a,b)=>b[1]-a[1]);
+  document.getElementById("groupTags").innerHTML=sorted.map(([k,v])=>`<span class="tag"><b>${v}</b> ${k}</span>`).join("");
+}
+
+function updateExtremes(){
+  let n=null,s=null,e=null,w=null;
+  cities.forEach(c=>{
+    if(!n||c.lat>n.lat)n=c;if(!s||c.lat<s.lat)s=c;
+    if(!e||c.lng>e.lng)e=c;if(!w||c.lng<w.lng)w=c;
+  });
+  const fmt=(v,t)=>{const a=Math.abs(v).toFixed(2);return t==="lat"?`${a}°${v>=0?"N":"S"}`:`${a}°${v>=0?"E":"W"}`};
+  let h="";
+  if(n)h+=`<span>⬆ <b>${n.name}</b> <span class="coord">${fmt(n.lat,"lat")}</span></span>`;
+  if(s)h+=`<span>⬇ <b>${s.name}</b> <span class="coord">${fmt(s.lat,"lat")}</span></span>`;
+  if(e)h+=`<span>➡ <b>${e.name}</b> <span class="coord">${fmt(e.lng,"lng")}</span></span>`;
+  if(w)h+=`<span>⬅ <b>${w.name}</b> <span class="coord">${fmt(w.lng,"lng")}</span></span>`;
+  document.getElementById("extremes").innerHTML=h;
+}
+
+function setGroupBy(v){
+  groupBy=v;
+  document.getElementById("btnContinent").className="tb"+(v==="continent"?" act":"");
+  document.getElementById("btnCountry").className="tb"+(v==="country"?" act":"");
+  updateGroupTags();
+}
+
+function updateTitle(){
+  document.getElementById("title").textContent="🌍 "+(ownerName?ownerName+"'s City Footprint":"My City Footprint");
+  document.getElementById("nameInput").value=ownerName;
+}
+
+// === Search ===
+function doSearch(q){
+  const list=document.getElementById("srList"),empty=document.getElementById("srEmpty");
+  if(!q||q.length<2){list.style.display="none";empty.style.display="none";return}
+  const s=q.toLowerCase();
+  const found=allCitiesDB.map(c=>{
+    const nl=c.name.toLowerCase(),cl=(c.country||"").toLowerCase();
+    let sc=0;
+    if(nl===s)sc=100;else if(nl.startsWith(s))sc=80;else if(nl.includes(s))sc=60;else if(cl.includes(s))sc=40;else return null;
+    if(c.name.length<20)sc+=5;return{...c,sc};
+  }).filter(Boolean).sort((a,b)=>b.sc-a.sc).slice(0,10);
+
+  if(found.length===0){list.style.display="none";empty.style.display="block";return}
+  empty.style.display="none";list.style.display="block";
+  list.innerHTML=found.map((r,i)=>{
+    const lat=parseFloat(r.lat),lng=parseFloat(r.lng);
+    const cname=CDATA[r.country]?.name||r.country||"";
+    const exists=cities.some(c=>Math.abs(c.lat-lat)<.01&&Math.abs(c.lng-lng)<.01);
+    return`<div class="sr-item" style="opacity:${exists?.5:1};cursor:${exists?"default":"pointer"}" onclick="${exists?"":`addFromSearch(${i})`}" data-lat="${lat}" data-lng="${lng}" data-name="${r.name.replace(/"/g,"&quot;")}" data-country="${cname.replace(/"/g,"&quot;")}" data-cc="${r.country||""}">
+      <div style="flex:1;min-width:0"><div class="name">${r.name}</div><div class="country">${cname}</div></div>
+      ${exists?'<span class="added">Added</span>':'<span class="plus">+</span>'}
+    </div>`;
+  }).join("");
+}
+
+function addFromSearch(i){
+  const items=document.querySelectorAll(".sr-item");
+  const el=items[i];if(!el)return;
+  openCityModal(-1,true,{
+    name:el.dataset.name,country:el.dataset.country,cc:el.dataset.cc,
+    lat:parseFloat(el.dataset.lat),lng:parseFloat(el.dataset.lng)
+  });
+  clearSearch();
+}
+
+function clearSearch(){
+  document.getElementById("searchInput").value="";
+  document.getElementById("searchClear").style.display="none";
+  document.getElementById("srList").style.display="none";
+  document.getElementById("srEmpty").style.display="none";
+}
+
+// === Edit Mode ===
+function toggleEdit(){
+  if(editMode){
+    editMode=false;
+    document.getElementById("editBtn").className="edit-btn locked";
+    document.getElementById("editBtn").innerHTML="🔒 Unlock to Edit";
+    document.getElementById("searchBox").style.display="none";
+    document.getElementById("nameRow").style.display="none";
+    renderMarkers();
+  }else{
+    document.getElementById("passOverlay").classList.add("show");
+    document.getElementById("passInput").value="";
+    document.getElementById("passErr").style.display="none";
+    setTimeout(()=>document.getElementById("passInput").focus(),100);
+  }
+}
+
+function checkPass(){
+  if(document.getElementById("passInput").value===CONFIG.EDIT_PASSWORD){
+    editMode=true;
+    document.getElementById("passOverlay").classList.remove("show");
+    document.getElementById("editBtn").className="edit-btn unlocked";
+    document.getElementById("editBtn").innerHTML="🔓 Edit Mode · Click to Lock";
+    document.getElementById("searchBox").style.display="block";
+    document.getElementById("nameRow").style.display="flex";
+    renderMarkers();
+  }else{
+    document.getElementById("passErr").style.display="block";
+  }
+}
+
+function closePassModal(){document.getElementById("passOverlay").classList.remove("show")}
+
+// === Name ===
+document.addEventListener("DOMContentLoaded",()=>{
+  document.getElementById("nameBtn").addEventListener("click",()=>{
+    ownerName=document.getElementById("nameInput").value.trim();
+    updateTitle();saveData();
+  });
+});
+
+// === City Modal ===
+function openCityModal(idx,isNew,data){
+  modalIdx=idx;modalIsNew=isNew;modalCustom=data?.custom||false;
+  const c=isNew?(data||{}):{...cities[idx]};
+
+  document.getElementById("cityModalTitle").textContent=isNew?"✨ Add City":"✏️ Edit City";
+  document.getElementById("mName").value=c.name||"";
+  document.getElementById("mCountry").value=c.country||"";
+  document.getElementById("mLat").value=c.lat||"";
+  document.getElementById("mLng").value=c.lng||"";
+  document.getElementById("mPhoto").value=c.photo||"";
+  document.getElementById("mDesc").value=c.desc||"";
+  document.getElementById("mCoordRow").style.display=modalCustom?"block":"none";
+  document.getElementById("mDelBtn").style.display=isNew?"none":"inline-block";
+
+  const img=document.getElementById("mPhotoPreview");
+  if(c.photo){img.src=c.photo;img.style.display="block"}else img.style.display="none";
+
+  // Category buttons
+  const cat=c.cat||"traveled";
+  document.getElementById("catRow").innerHTML=Object.entries(CATS).map(([k,v])=>
+    `<button class="cat-btn${cat===k?" act":""}" style="color:${v.color};border-color:${cat===k?v.color:"#eee"};background:${cat===k?v.bg:"#fff"}" onclick="pickCat('${k}')">${v.label}</button>`
+  ).join("");
+
+  document.getElementById("cityOverlay").classList.add("show");
+}
+
+function pickCat(k){
+  document.querySelectorAll(".cat-btn").forEach(b=>{
+    const ck=Object.keys(CATS).find(c=>b.textContent.includes(CATS[c].label.split(" ").slice(1).join(" ")));
+    if(!ck)return;
+    const isAct=ck===k;
+    b.className="cat-btn"+(isAct?" act":"");
+    b.style.borderColor=isAct?CATS[ck].color:"#eee";
+    b.style.background=isAct?CATS[ck].bg:"#fff";
+  });
+}
+
+function getSelectedCat(){
+  const btn=document.querySelector(".cat-btn.act");
+  if(!btn)return"traveled";
+  return Object.keys(CATS).find(k=>btn.textContent.includes(CATS[k].label.split(" ").slice(1).join(" ")))||"traveled";
+}
+
+function closeCityModal(){document.getElementById("cityOverlay").classList.remove("show")}
+
+function saveCity(){
+  const name=document.getElementById("mName").value.trim();
+  if(!name)return;
+  const c={
+    name,country:document.getElementById("mCountry").value.trim(),
+    cc:modalIsNew?(cities[0]?.cc||""):(cities[modalIdx]?.cc||""),
+    lat:parseFloat(document.getElementById("mLat").value),
+    lng:parseFloat(document.getElementById("mLng").value),
+    cat:getSelectedCat(),
+    desc:document.getElementById("mDesc").value.trim(),
+    photo:document.getElementById("mPhoto").value.trim()
+  };
+  // Try to get cc from search data
+  if(modalIsNew&&!modalCustom){
+    const sr=document.querySelector(".sr-item[data-name]");
+    // cc should be set from openCityModal data
+  }
+  if(modalIsNew)cities.push(c);
+  else cities[modalIdx]=c;
+  closeCityModal();
+  refresh();saveData();
+}
+
+function deleteCity(){
+  if(!modalIsNew&&modalIdx>=0){cities.splice(modalIdx,1);closeCityModal();refresh();saveData()}
+}
+
+function refresh(){colorCountries();renderMarkers();updateStats()}
+
+// Override openCityModal to preserve cc
+const _open=openCityModal;
+openCityModal=function(idx,isNew,data){
+  _open(idx,isNew,data);
+  // store cc for saving
+  if(data?.cc)document.getElementById("catRow").dataset.cc=data.cc;
+  else if(!isNew&&cities[idx])document.getElementById("catRow").dataset.cc=cities[idx].cc||"";
+  else document.getElementById("catRow").dataset.cc="";
+};
+// patch saveCity to use stored cc
+const _save=saveCity;
+saveCity=function(){
+  const name=document.getElementById("mName").value.trim();
+  if(!name)return;
+  const cc=document.getElementById("catRow").dataset.cc||"";
+  const c={name,country:document.getElementById("mCountry").value.trim(),cc,
+    lat:parseFloat(document.getElementById("mLat").value),lng:parseFloat(document.getElementById("mLng").value),
+    cat:getSelectedCat(),desc:document.getElementById("mDesc").value.trim(),photo:document.getElementById("mPhoto").value.trim()};
+  if(modalIsNew)cities.push(c);else cities[modalIdx]=c;
+  closeCityModal();refresh();saveData();
+};
+
+init().catch(e=>{console.error(e);document.getElementById("loader").innerHTML='<span class="icon">😢</span><span class="text">Failed to load. Please refresh.</span>'});
+</script>
+</body>
+</html>

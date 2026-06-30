@@ -35,19 +35,21 @@ svg{display:block;width:100%;height:100vh}
 .extremes .coord{color:#999}
 
 /* Search */
-.search-box{position:absolute;top:16px;right:16px;width:320px;z-index:10;display:none}
+.search-box{position:absolute;top:16px;right:16px;width:360px;z-index:10;display:none}
 .search-inner{background:rgba(255,255,255,.92);border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,.08);backdrop-filter:blur(10px);overflow:hidden}
 .search-row{display:flex;align-items:center;padding:12px 16px;gap:8px}
 .search-row input{border:none;padding:4px 0;font-size:15px;outline:none;background:transparent;width:100%;font-family:inherit}
 .search-row .clear{cursor:pointer;color:#999;font-size:18px;display:none}
-.sr-list{border-top:1px solid #f0f0f0;max-height:300px;overflow-y:auto;display:none}
+.sr-list{border-top:1px solid #f0f0f0;max-height:400px;overflow-y:auto;display:none}
 .sr-item{padding:10px 16px;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
 .sr-item:hover{background:#F5F5F5}
 .sr-item .name{font-size:14px;font-weight:500}
-.sr-item .country{font-size:12px;color:#999;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sr-item .region{font-size:12px;color:#777;margin-top:1px}
+.sr-item .coords{font-size:11px;color:#bbb;margin-top:2px;font-family:'SF Mono',Consolas,monospace}
 .sr-item .added{font-size:11px;color:#aaa;margin-left:8px}
 .sr-item .plus{color:#4ECDC4;margin-left:8px;font-size:18px}
 .sr-empty{border-top:1px solid #f0f0f0;padding:12px 16px;color:#999;font-size:13px;display:none}
+.sr-loading{border-top:1px solid #f0f0f0;padding:12px 16px;color:#999;font-size:13px;display:none}
 
 /* Edit button */
 .edit-btn{position:absolute;bottom:20px;left:20px;display:flex;align-items:center;gap:8px;border:none;border-radius:14px;padding:10px 18px;font-size:14px;cursor:pointer;z-index:10;backdrop-filter:blur(10px)}
@@ -62,6 +64,7 @@ svg{display:block;width:100%;height:100vh}
 .tooltip .tt-name span.d{width:10px;height:10px;border-radius:50%}
 .tooltip .tt-name span.n{font-weight:600;font-size:15px}
 .tooltip .tt-meta{font-size:12px;color:#999}
+.tooltip .tt-coords{font-size:11px;color:#bbb;margin-top:2px;font-family:'SF Mono',Consolas,monospace}
 .tooltip .tt-desc{font-size:13px;color:#555;line-height:1.5;margin-top:6px}
 
 /* Overlays */
@@ -91,11 +94,11 @@ textarea.inp{resize:vertical}
 <body>
 
 <!-- ============================================================
-  CONFIGURATION: Fill in your jsonbin.io credentials below.
-  1. Sign up at https://jsonbin.io (free)
-  2. Create a bin with content: {"cities":[],"name":""}
-  3. Copy your Bin ID and Master Key below
-  4. Set your edit password
+     CONFIGURATION: Fill in your jsonbin.io credentials below.
+     1. Sign up at https://jsonbin.io (free)
+     2. Create a bin with content: {"cities":[],"name":""}
+     3. Copy your Bin ID and Master Key below
+     4. Set your edit password
 ============================================================ -->
 <script>
 const CONFIG = {
@@ -106,7 +109,7 @@ const CONFIG = {
 </script>
 
 <!-- Loading -->
-<div id="loader" class="loader"><span class="icon">🌍</span><span class="text">Loading map & city database...</span></div>
+<div id="loader" class="loader"><span class="icon">🌍</span><span class="text">Loading map...</span></div>
 
 <!-- Map -->
 <svg id="map" style="display:none"><g id="mapG"></g></svg>
@@ -150,6 +153,7 @@ const CONFIG = {
       <input id="searchInput" placeholder="Search any city worldwide...">
       <span class="clear" id="searchClear" onclick="clearSearch()">✕</span>
     </div>
+    <div class="sr-loading" id="srLoading">⏳ Searching...</div>
     <div class="sr-list" id="srList"></div>
     <div class="sr-empty" id="srEmpty">No results found.</div>
   </div>
@@ -164,6 +168,7 @@ const CONFIG = {
   <div class="tt-body">
     <div class="tt-name"><span class="d" id="ttDot"></span><span class="n" id="ttName"></span></div>
     <div class="tt-meta" id="ttMeta"></div>
+    <div class="tt-coords" id="ttCoords"></div>
     <div class="tt-desc" id="ttDesc"></div>
   </div>
 </div>
@@ -220,11 +225,62 @@ const CC_RAW="AF,Afghanistan,AS|AL,Albania,EU|DZ,Algeria,AF|AD,Andorra,EU|AO,Ang
 const CONT_NAMES={AS:"Asia",EU:"Europe",NA:"N. America",SA:"S. America",AF:"Africa",OC:"Oceania"};
 const CDATA={};
 CC_RAW.split("|").forEach(e=>{const[c,n,co]=e.split(",");CDATA[c]={name:n,cont:co}});
-
 const CATS={lived:{label:"🏠 Lived",color:"#FF6B6B",bg:"#FFF0F0"},traveled:{label:"✈️ Traveled",color:"#4ECDC4",bg:"#F0FFFD"},transit:{label:"🔄 Passed Through",color:"#FFD166",bg:"#FFFBF0"}};
 
+// ==========================================================
+//  Nominatim Geocoding (replaces manual lookup tables)
+// ==========================================================
+const NOMINATIM_BASE = "https://nominatim.openstreetmap.org";
+const reverseCache = new Map();
+
+// Reverse geocode: lat,lng → { region, country, cc }
+async function reverseGeocode(lat, lng) {
+  const key = parseFloat(lat).toFixed(3) + "," + parseFloat(lng).toFixed(3);
+  if (reverseCache.has(key)) return reverseCache.get(key);
+  try {
+    const url = `${NOMINATIM_BASE}/reverse?lat=${lat}&lon=${lng}&format=json&addressdetails=1&zoom=10&accept-language=en`;
+    const resp = await fetch(url);
+    const data = await resp.json();
+    const addr = data.address || {};
+    const result = {
+      region: addr.state || addr.province || addr.state_district || addr.region || "",
+      country: addr.country || "",
+      cc: (addr.country_code || "").toUpperCase()
+    };
+    reverseCache.set(key, result);
+    return result;
+  } catch (e) {
+    console.warn("Reverse geocode failed:", e);
+    return { region: "", country: "", cc: "" };
+  }
+}
+
+// Search: query → array of place objects
+let searchAbort = null;
+async function nominatimSearch(query) {
+  if (searchAbort) searchAbort.abort();
+  const controller = new AbortController();
+  searchAbort = controller;
+  const url = `${NOMINATIM_BASE}/search?q=${encodeURIComponent(query)}&format=json&addressdetails=1&limit=12&accept-language=en`;
+  const resp = await fetch(url, { signal: controller.signal });
+  return resp.json();
+}
+
+// Extract the best city-level name from a Nominatim address object
+function extractCityName(addr, fallbackName) {
+  return addr.city || addr.town || addr.village || addr.hamlet || addr.municipality || fallbackName || "";
+}
+
+function formatCoord(lat, lng) {
+  lat = parseFloat(lat); lng = parseFloat(lng);
+  if (isNaN(lat) || isNaN(lng)) return "";
+  const la = Math.abs(lat).toFixed(2) + "°" + (lat >= 0 ? "N" : "S");
+  const lo = Math.abs(lng).toFixed(2) + "°" + (lng >= 0 ? "E" : "W");
+  return la + ", " + lo;
+}
+
 // === State ===
-let cities=[], ownerName="", allCitiesDB=[], geoData=null;
+let cities=[], ownerName="", geoData=null;
 let editMode=false, groupBy="continent";
 let modalIdx=-1, modalIsNew=true, modalCustom=false;
 let proj, path, zoomTf=d3.zoomIdentity;
@@ -250,31 +306,25 @@ async function saveData(){
   }catch(e){console.error("Save error:",e)}
 }
 
-// === Init ===
+// === Init (no longer loads cities.json) ===
 async function init(){
-  const[topoRaw,cityDB]=await Promise.all([
-    fetch("https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json").then(r=>r.json()),
-    fetch("https://cdn.jsdelivr.net/npm/cities.json@1.1.2/cities.json").then(r=>r.json()).catch(()=>[])
-  ]);
+  const topoRaw = await fetch("https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json").then(r=>r.json());
   geoData=topoFeature(topoRaw,"countries");
-  allCitiesDB=cityDB;
   await loadData();
-
   document.getElementById("loader").style.display="none";
   document.getElementById("map").style.display="block";
   document.getElementById("panel").style.display="block";
-
   renderMap();
   updateStats();
   updateTitle();
 
-  // Search
+  // Search with debounce
   let timer;
   const si=document.getElementById("searchInput");
   si.addEventListener("input",()=>{
     clearTimeout(timer);
     document.getElementById("searchClear").style.display=si.value?"block":"none";
-    timer=setTimeout(()=>doSearch(si.value),250);
+    timer=setTimeout(()=>doSearch(si.value),450);
   });
 
   // Photo preview
@@ -344,13 +394,13 @@ function renderMarkers(){
     const m=g.append("circle").attr("class","cm").attr("cx",x).attr("cy",y).attr("r",6/k)
       .attr("fill",CATS[c.cat].color).attr("stroke","#fff").attr("stroke-width",2/k)
       .style("cursor","pointer").style("filter","drop-shadow(0 1px 2px rgba(0,0,0,0.3))")
-      .on("mouseenter",ev=>{showTooltip(c,x,y)}).on("mouseleave",()=>hideTooltip());
+      .on("mouseenter",()=>{showTooltip(c,x,y)}).on("mouseleave",()=>hideTooltip());
     if(editMode)m.on("click",()=>openCityModal(i,false));
     else m.on("click",null);
   });
 }
 
-// === Tooltip ===
+// === Tooltip (uses Nominatim reverse geocoding with cache) ===
 function showTooltip(c,mx,my){
   const tt=document.getElementById("tooltip");
   const rect=document.getElementById("map").getBoundingClientRect();
@@ -360,12 +410,40 @@ function showTooltip(c,mx,my){
   if(c.photo){img.src=c.photo;img.style.display="block"}else img.style.display="none";
   document.getElementById("ttDot").style.background=CATS[c.cat]?.color;
   document.getElementById("ttName").textContent=c.name;
-  document.getElementById("ttMeta").textContent=c.country+" · "+(CATS[c.cat]?.label||"");
+
+  // Build meta line: use stored region if available, otherwise fetch
+  const catLabel = CATS[c.cat]?.label || "";
+  const buildMeta = (region) => {
+    const parts = [];
+    if (region) parts.push(region);
+    if (c.country) parts.push(c.country);
+    parts.push(catLabel);
+    return parts.join(" · ");
+  };
+
+  document.getElementById("ttMeta").textContent = buildMeta(c.region || "");
+
+  // If no stored region, fetch asynchronously and update tooltip in place
+  if (!c.region && c.lat && c.lng) {
+    reverseGeocode(c.lat, c.lng).then(info => {
+      if (info.region && tt.style.display !== "none") {
+        document.getElementById("ttMeta").textContent = buildMeta(info.region);
+      }
+    }).catch(() => {});
+  }
+
+  // Coordinates
+  const coordStr = formatCoord(c.lat, c.lng);
+  const ttCoords = document.getElementById("ttCoords");
+  if (coordStr) { ttCoords.textContent = coordStr; ttCoords.style.display = "block"; }
+  else { ttCoords.style.display = "none"; }
+
   const desc=document.getElementById("ttDesc");
   if(c.desc){desc.textContent=c.desc;desc.style.display="block"}else desc.style.display="none";
 
   tt.style.left=(px+12)+"px";tt.style.top=(py-10)+"px";tt.style.display="block";
 }
+
 function hideTooltip(){document.getElementById("tooltip").style.display="none"}
 
 // === Stats ===
@@ -376,7 +454,6 @@ function updateStats(){
   document.getElementById("stLived").textContent=cities.filter(c=>c.cat==="lived").length;
   document.getElementById("stTraveled").textContent=cities.filter(c=>c.cat==="traveled").length;
   document.getElementById("stTransit").textContent=cities.filter(c=>c.cat==="transit").length;
-
   const extra=document.getElementById("extraStats");
   if(cities.length===0){extra.style.display="none";return}
   extra.style.display="block";
@@ -422,37 +499,90 @@ function updateTitle(){
   document.getElementById("nameInput").value=ownerName;
 }
 
-// === Search ===
-function doSearch(q){
-  const list=document.getElementById("srList"),empty=document.getElementById("srEmpty");
-  if(!q||q.length<2){list.style.display="none";empty.style.display="none";return}
-  const s=q.toLowerCase();
-  const found=allCitiesDB.map(c=>{
-    const nl=c.name.toLowerCase(),cl=(c.country||"").toLowerCase();
-    let sc=0;
-    if(nl===s)sc=100;else if(nl.startsWith(s))sc=80;else if(nl.includes(s))sc=60;else if(cl.includes(s))sc=40;else return null;
-    if(c.name.length<20)sc+=5;return{...c,sc};
-  }).filter(Boolean).sort((a,b)=>b.sc-a.sc).slice(0,10);
+// ==========================================================
+//  Search (now powered by Nominatim Search API)
+// ==========================================================
+let searchSeq = 0;   // avoid stale results overwriting newer ones
 
-  if(found.length===0){list.style.display="none";empty.style.display="block";return}
-  empty.style.display="none";list.style.display="block";
-  list.innerHTML=found.map((r,i)=>{
-    const lat=parseFloat(r.lat),lng=parseFloat(r.lng);
-    const cname=CDATA[r.country]?.name||r.country||"";
-    const exists=cities.some(c=>Math.abs(c.lat-lat)<.01&&Math.abs(c.lng-lng)<.01);
-    return`<div class="sr-item" style="opacity:${exists?.5:1};cursor:${exists?"default":"pointer"}" onclick="${exists?"":`addFromSearch(${i})`}" data-lat="${lat}" data-lng="${lng}" data-name="${r.name.replace(/"/g,"&quot;")}" data-country="${cname.replace(/"/g,"&quot;")}" data-cc="${r.country||""}">
-      <div style="flex:1;min-width:0"><div class="name">${r.name}</div><div class="country">${cname}</div></div>
-      ${exists?'<span class="added">Added</span>':'<span class="plus">+</span>'}
-    </div>`;
-  }).join("");
+async function doSearch(q){
+  const list=document.getElementById("srList");
+  const empty=document.getElementById("srEmpty");
+  const loading=document.getElementById("srLoading");
+
+  if(!q||q.length<2){
+    list.style.display="none";empty.style.display="none";loading.style.display="none";
+    return;
+  }
+
+  const seq = ++searchSeq;
+  loading.style.display="block";
+  list.style.display="none";
+  empty.style.display="none";
+
+  try {
+    const results = await nominatimSearch(q);
+
+    // Discard if a newer search has started
+    if (seq !== searchSeq) return;
+    loading.style.display="none";
+
+    if (!results || results.length===0) {
+      empty.style.display="block";
+      return;
+    }
+
+    list.style.display="block";
+    list.innerHTML = results.map((r, i) => {
+      const lat = parseFloat(r.lat);
+      const lng = parseFloat(r.lon);
+      const addr = r.address || {};
+      const cityName = extractCityName(addr, r.name);
+      const region = addr.state || addr.province || addr.state_district || addr.region || "";
+      const country = addr.country || "";
+      const cc = (addr.country_code || "").toUpperCase();
+      const exists = cities.some(c => Math.abs(c.lat-lat)<0.01 && Math.abs(c.lng-lng)<0.01);
+      const coordStr = formatCoord(lat, lng);
+
+      let regionLine = "";
+      if (region && country) regionLine = region + ", " + country;
+      else if (country) regionLine = country;
+
+      return `<div class="sr-item" style="opacity:${exists?.5:1};cursor:${exists?"default":"pointer"}"
+        onclick="${exists?"":("addFromSearch("+i+")")}"
+        data-idx="${i}" data-lat="${lat}" data-lng="${lng}"
+        data-name="${cityName.replace(/"/g,"&quot;")}"
+        data-country="${country.replace(/"/g,"&quot;")}"
+        data-cc="${cc}"
+        data-region="${region.replace(/"/g,"&quot;")}">
+        <div style="flex:1;min-width:0">
+          <div class="name">${cityName}</div>
+          <div class="region">${regionLine}</div>
+          <div class="coords">${coordStr}</div>
+        </div>
+        ${exists?'<span class="added">Added</span>':'<span class="plus">+</span>'}
+      </div>`;
+    }).join("");
+
+  } catch(e) {
+    if (e.name === "AbortError") return;   // cancelled by newer search
+    if (seq !== searchSeq) return;
+    loading.style.display="none";
+    list.style.display="block";
+    list.innerHTML='<div style="padding:12px 16px;color:#FF6B6B;font-size:13px">Search request failed. Please try again.</div>';
+    console.error("Search error:",e);
+  }
 }
 
 function addFromSearch(i){
-  const items=document.querySelectorAll(".sr-item");
-  const el=items[i];if(!el)return;
+  const el=document.querySelectorAll(".sr-item")[i];
+  if(!el)return;
   openCityModal(-1,true,{
-    name:el.dataset.name,country:el.dataset.country,cc:el.dataset.cc,
-    lat:parseFloat(el.dataset.lat),lng:parseFloat(el.dataset.lng)
+    name: el.dataset.name,
+    country: el.dataset.country,
+    cc: el.dataset.cc,
+    region: el.dataset.region,
+    lat: parseFloat(el.dataset.lat),
+    lng: parseFloat(el.dataset.lng)
   });
   clearSearch();
 }
@@ -462,6 +592,7 @@ function clearSearch(){
   document.getElementById("searchClear").style.display="none";
   document.getElementById("srList").style.display="none";
   document.getElementById("srEmpty").style.display="none";
+  document.getElementById("srLoading").style.display="none";
 }
 
 // === Edit Mode ===
@@ -523,7 +654,6 @@ function openCityModal(idx,isNew,data){
   const img=document.getElementById("mPhotoPreview");
   if(c.photo){img.src=c.photo;img.style.display="block"}else img.style.display="none";
 
-  // Category buttons
   const cat=c.cat||"traveled";
   document.getElementById("catRow").innerHTML=Object.entries(CATS).map(([k,v])=>
     `<button class="cat-btn${cat===k?" act":""}" style="color:${v.color};border-color:${cat===k?v.color:"#eee"};background:${cat===k?v.bg:"#fff"}" onclick="pickCat('${k}')">${v.label}</button>`
@@ -551,53 +681,41 @@ function getSelectedCat(){
 
 function closeCityModal(){document.getElementById("cityOverlay").classList.remove("show")}
 
-function saveCity(){
-  const name=document.getElementById("mName").value.trim();
-  if(!name)return;
-  const c={
-    name,country:document.getElementById("mCountry").value.trim(),
-    cc:modalIsNew?(cities[0]?.cc||""):(cities[modalIdx]?.cc||""),
-    lat:parseFloat(document.getElementById("mLat").value),
-    lng:parseFloat(document.getElementById("mLng").value),
-    cat:getSelectedCat(),
-    desc:document.getElementById("mDesc").value.trim(),
-    photo:document.getElementById("mPhoto").value.trim()
-  };
-  // Try to get cc from search data
-  if(modalIsNew&&!modalCustom){
-    const sr=document.querySelector(".sr-item[data-name]");
-    // cc should be set from openCityModal data
-  }
-  if(modalIsNew)cities.push(c);
-  else cities[modalIdx]=c;
-  closeCityModal();
-  refresh();saveData();
-}
-
 function deleteCity(){
   if(!modalIsNew&&modalIdx>=0){cities.splice(modalIdx,1);closeCityModal();refresh();saveData()}
 }
 
 function refresh(){colorCountries();renderMarkers();updateStats()}
 
-// Override openCityModal to preserve cc
+// Override openCityModal to preserve cc + region
 const _open=openCityModal;
 openCityModal=function(idx,isNew,data){
   _open(idx,isNew,data);
-  // store cc for saving
-  if(data?.cc)document.getElementById("catRow").dataset.cc=data.cc;
-  else if(!isNew&&cities[idx])document.getElementById("catRow").dataset.cc=cities[idx].cc||"";
-  else document.getElementById("catRow").dataset.cc="";
+  const row = document.getElementById("catRow");
+  if(data?.cc)    row.dataset.cc=data.cc;
+  else if(!isNew&&cities[idx]) row.dataset.cc=cities[idx].cc||"";
+  else row.dataset.cc="";
+  if(data?.region) row.dataset.region=data.region;
+  else if(!isNew&&cities[idx]) row.dataset.region=cities[idx].region||"";
+  else row.dataset.region="";
 };
-// patch saveCity to use stored cc
-const _save=saveCity;
+
+// Patch saveCity to persist cc + region
 saveCity=function(){
   const name=document.getElementById("mName").value.trim();
   if(!name)return;
-  const cc=document.getElementById("catRow").dataset.cc||"";
-  const c={name,country:document.getElementById("mCountry").value.trim(),cc,
-    lat:parseFloat(document.getElementById("mLat").value),lng:parseFloat(document.getElementById("mLng").value),
-    cat:getSelectedCat(),desc:document.getElementById("mDesc").value.trim(),photo:document.getElementById("mPhoto").value.trim()};
+  const row = document.getElementById("catRow");
+  const c={
+    name,
+    country: document.getElementById("mCountry").value.trim(),
+    cc: row.dataset.cc||"",
+    region: row.dataset.region||"",
+    lat: parseFloat(document.getElementById("mLat").value),
+    lng: parseFloat(document.getElementById("mLng").value),
+    cat: getSelectedCat(),
+    desc: document.getElementById("mDesc").value.trim(),
+    photo: document.getElementById("mPhoto").value.trim()
+  };
   if(modalIsNew)cities.push(c);else cities[modalIdx]=c;
   closeCityModal();refresh();saveData();
 };

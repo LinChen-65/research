@@ -58,7 +58,7 @@ svg{display:block;width:100%;height:100vh}
 
 /* Tooltip */
 .tooltip{position:fixed;background:#fff;border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,.15);z-index:50;max-width:280px;overflow:hidden;animation:fadeIn .15s;pointer-events:none;display:none}
-.tooltip img{width:100%;height:140px;object-fit:cover}
+.tooltip img{width:100%;max-height:200px;object-fit:contain;background:#f5f5f5}
 .tooltip .tt-body{padding:12px 16px}
 .tooltip .tt-name{display:flex;align-items:center;gap:6px;margin-bottom:4px}
 .tooltip .tt-name span.d{width:10px;height:10px;border-radius:50%}
@@ -79,7 +79,7 @@ textarea.inp{resize:vertical}
 .cat-row{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
 .cat-btn{transition:all .2s;cursor:pointer;border:2px solid #eee;border-radius:12px;padding:8px 14px;background:#fff;font-size:13px;font-family:inherit}
 .cat-btn.act{transform:scale(1.05)}
-.modal-img{width:100%;height:120px;object-fit:cover;border-radius:12px;margin-bottom:14px}
+.modal-img{width:100%;max-height:240px;object-fit:contain;border-radius:12px;margin-bottom:14px;background:#f5f5f5}
 .btn-row{display:flex;gap:10px}
 .sbtn{background:linear-gradient(135deg,#4ECDC4,#44B09E);color:#fff;border:none;padding:12px 32px;border-radius:14px;font-size:16px;font-weight:600;cursor:pointer;transition:transform .2s,box-shadow .2s}
 .sbtn:hover{transform:translateY(-1px);box-shadow:0 4px 15px rgba(78,205,196,.4)}
@@ -176,7 +176,7 @@ const CONFIG = {
 
 <!-- Tooltip -->
 <div class="tooltip" id="tooltip">
-  <img id="ttImg" src="" onerror="this.style.display='none'">
+  <img id="ttImg" src="" style="display:none">
   <div class="tt-body">
     <div class="tt-name"><span class="d" id="ttDot"></span><span class="n" id="ttName"></span></div>
     <div class="tt-meta" id="ttMeta"></div>
@@ -442,7 +442,15 @@ function showTooltip(c,mx,my){
   const px=zoomTf.applyX(mx)+rect.left, py=zoomTf.applyY(my)+rect.top;
 
   const img=document.getElementById("ttImg");
-  if(c.photo){img.src=c.photo;img.style.display="block"}else img.style.display="none";
+  if(c.photo){
+    img.src="";                                      // Clear previous src to force reload
+    img.onerror=function(){this.style.display="none"};
+    img.onload=function(){this.style.display="block"};
+    img.style.display="none";                        // Hide until loaded
+    img.src=c.photo;
+  }else{
+    img.style.display="none";
+  }
   document.getElementById("ttDot").style.background=CATS[c.cat]?.color;
   document.getElementById("ttName").textContent=c.name;
 
